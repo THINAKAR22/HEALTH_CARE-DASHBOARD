@@ -1,0 +1,7 @@
+health/
+venv/
+__pycache__/
+.env
+*.pyc
+*.pkl
+instance/

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthWatch Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <i class="fas fa-heartbeat"></i> HealthWatch
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/dashboard" class="active">Dashboard</a>
+                <a href="/admin">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard">
+        <div class="container">
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="card blue fade-in">
+                    <div class="card-content">
+                        <h3>Total Cases</h3>
+                        <div class="card-number" id="total-cases">0</div>
+                    </div>
+                    <div class="card-icon">
+                        <i class="fas fa-virus"></i>
+                    </div>
+                </div>
+                
+                <div class="card orange fade-in" style="animation-delay: 0.1s;">
+                    <div class="card-content">
+                        <h3>Active Cases</h3>
+                        <div class="card-number" id="active-cases">0</div>
+                    </div>
+                    <div class="card-icon">
+                        <i class="fas fa-procedures"></i>
+                    </div>
+                </div>
+                
+                <div class="card red fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-content">
+                        <h3>Total Deaths</h3>
+                        <div class="card-number" id="total-deaths">0</div>
+                    </div>
+                    <div class="card-icon">
+                        <i class="fas fa-skull-crossbones"></i>
+                    </div>
+                </div>
+                
+                <div class="card green fade-in" style="animation-delay: 0.3s;">
+                    <div class="card-content">
+                        <h3>Risk Level</h3>
+                        <div class="risk-badge low" id="risk-level">Loading...</div>
+                    </div>
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+                <div class="chart-container fade-in" style="animation-delay: 0.4s;">
+                    <h3><i class="fas fa-chart-line"></i> Cases Trend</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container fade-in" style="animation-delay: 0.5s;">
+                    <h3><i class="fas fa-chart-bar"></i> Region Comparison</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container fade-in" style="animation-delay: 0.6s;">
+                    <h3><i class="fas fa-chart-pie"></i> Outcome Distribution</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Heatmap Section -->
+                <div class="chart-container fade-in" style="animation-delay: 0.7s; grid-column: span 2;">
+                    <div class="heatmap-title">
+                        <h3><i class="fas fa-map-marked-alt"></i> Regional Risk Heatmap</h3>
+                        <span class="badge">Click on regions for details</span>
+                    </div>
+                    <div id="heatmap-container" class="heatmap-wrapper">
+                        <!-- Heatmap will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prediction Panel -->
+            <div class="prediction-panel fade-in" style="animation-delay: 0.8s;">
+                <h3><i class="fas fa-robot"></i> AI Outbreak Prediction</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="prediction-form">
+                        <div class="form-group">
+                            <label for="predict-region">Region:</label>
+                            <select id="predict-region">
+                                <option value="North">North</option>
+                                <option value="South">South</option>
+                                <option value="East">East</option>
+                                <option value="West">West</option>
+                                <option value="Central">Central</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="predict-cases">Current Cases:</label>
+                            <input type="number" id="predict-cases" placeholder="Enter number of cases">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="predict-prev-cases">Previous Cases (optional):</label>
+                            <input type="number" id="predict-prev-cases" placeholder="For growth rate">
+                        </div>
+                        
+                        <button onclick="predictRisk()" class="btn btn-primary">
+                            <i class="fas fa-brain"></i> Predict Risk
+                        </button>
+                    </div>
+                    
+                    <div id="prediction-result">
+                        <!-- Prediction result will be displayed here -->
+                        <div style="text-align: center; color: #999; padding: 2rem;">
+                            <i class="fas fa-chart-simple" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p>Enter data and click Predict to see results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/heatmap.js') }}"></script>
+    
+    <!-- Auto-refresh setup -->
+    <script>
+        // Refresh dashboard data every 5 minutes
+        setInterval(() => {
+            if (window.dashboardCharts) {
+                window.dashboardCharts.init();
+            }
+            if (window.riskHeatmap) {
+                window.riskHeatmap.init();
+            }
+        }, 300000);
+
+        // Add loading indicator
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card-number');
+            cards.forEach(card => {
+                if (card.textContent === '0') {
+                    card.classList.add('loading');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
