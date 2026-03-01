@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 from flask_cors import CORS
 import pymysql
+from config import DB_CONFIG
 import pymysql.cursors
 import pandas as pd
 import numpy as np
@@ -28,12 +29,12 @@ def get_db_connection():
             user=DB_CONFIG['user'],
             password=DB_CONFIG['password'],
             database=DB_CONFIG['database'],
-            port=DB_CONFIG.get('port', 3306),
+            port=DB_CONFIG['port'],
             cursorclass=pymysql.cursors.DictCursor
         )
         return connection
     except Exception as e:
-        print(f"Database connection error: {e}")
+        print("Database connection error:", e)
         return None
 
 # Routes

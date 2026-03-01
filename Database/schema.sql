@@ -50,6 +50,12 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default admin (password: admin123 - change in production)
-INSERT INTO admin_users (username, password_hash, email) VALUES
-('admin', 'scrypt:32768:8:1$J9Y0q7Xm2LpR4tVw$5a3e1c8b9d2f4a6c7e8b9d0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d', 'admin@healthwatch.com');
+cursor.execute("""
+SELECT * FROM admin_users WHERE username='admin'
+""")
+
+if not cursor.fetchone():
+    cursor.execute("""
+    INSERT INTO admin_users (username, password_hash)
+    VALUES ('admin', 'scrypt:32768:8:1$J9Y0q7Xm2LpR4tVw$5a3e1c8b9d2f4a6c7e8b9d0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d')
+    """)
