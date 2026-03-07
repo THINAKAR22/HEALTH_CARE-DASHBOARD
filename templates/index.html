@@ -3,116 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthWatch - Real-Time Disease Surveillance</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>HealthWatch · Real-Time Disease Surveillance</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #050505;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #1a1f35 0%, #050505 70%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --primary-accent: #00f2fe;
+            --primary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --secondary-accent: #667eea;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-base);
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(5, 5, 5, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover { color: var(--text-main); }
+
+        .btn-launch {
+            background: var(--primary-gradient);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.5);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 160px 0 100px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(0,242,254,0.1) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(0, 242, 254, 0.1);
+            color: var(--primary-accent);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            font-weight: 800;
+            background: linear-gradient(180deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .hero-btns {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: #000;
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.5);
+        }
+
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 120px;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 242, 254, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: radial-gradient(circle at top left, rgba(0,242,254,0.2), transparent);
+            border: 1px solid rgba(0,242,254,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--primary-accent);
+            transform: rotate(-5deg);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* About / Tech */
+        .tech-section {
+            background: radial-gradient(circle at center, rgba(10, 15, 30, 0.8) 0%, transparent 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 60px;
+            text-align: center;
+            margin-bottom: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-accent), transparent);
+        }
+
+        .tech-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+        }
+
+        .tech-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-family: 'Outfit';
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .tech-badge:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-muted);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
-        <div class="container">
+        <div class="container nav-content">
             <a href="/" class="logo">
-                <i class="fas fa-heartbeat"></i> HealthWatch
+                <i class="fas fa-satellite-dish"></i> HealthWatch
             </a>
             <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/dashboard">Dashboard</a>
-                <a href="/admin">Admin</a>
+                <a href="#features">Capabilities</a>
+                <a href="#tech">Infrastructure</a>
+                <a href="/dashboard" class="btn-launch">Access Terminal</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1 class="fade-in">Real-Time Disease Surveillance System</h1>
-            <p class="fade-in" style="animation-delay: 0.2s;">
-                Monitor, predict, and respond to disease outbreaks with AI-powered insights
-            </p>
-            <a href="/dashboard" class="btn btn-primary" style="animation-delay: 0.4s;">
-                <i class="fas fa-chart-line"></i> Go to Dashboard
-            </a>
-        </div>
-    </section>
-
-    <!-- Features Section -->
     <div class="container">
-        <div class="features">
-            <div class="feature fade-in" style="animation-delay: 0.6s;">
-                <i class="fas fa-chart-pie"></i>
-                <h3>Real-Time Monitoring</h3>
-                <p>Track disease cases across regions with live updates and interactive charts</p>
+        <section class="hero">
+            <div class="hero-badge"><i class="fas fa-shield-alt"></i> Level 4 Clearance Required</div>
+            <h1>Predictive Disease<br>Surveillance System</h1>
+            <p>Monitor, forecast, and neutralize pathogenic threats utilizing advanced neural networks, real-time telemetry, and global geospatial analysis.</p>
+            <div class="hero-btns">
+                <a href="#features" class="btn-secondary">View Threat Model</a>
+                <a href="/dashboard" class="btn-primary"><i class="fas fa-terminal"></i> Initialize Dashboard</a>
             </div>
-            <div class="feature fade-in" style="animation-delay: 0.8s;">
-                <i class="fas fa-map-marked-alt"></i>
-                <h3>Risk Heatmaps</h3>
-                <p>Visualize outbreak intensity with color-coded regional risk assessment</p>
+        </section>
+
+        <section id="features" class="features-grid">
+            <div class="feature-card" style="animation: fadeInUp 0.8s ease-out 0.8s both;">
+                <div class="feature-icon"><i class="fas fa-radar"></i></div>
+                <h3>Live Telemetry</h3>
+                <p>Ingest millions of regional data points per second. Visualize outbreak velocity with precision heatmaps.</p>
             </div>
-            <div class="feature fade-in" style="animation-delay: 1s;">
-                <i class="fas fa-robot"></i>
-                <h3>AI Predictions</h3>
-                <p>Machine learning models predict outbreak probabilities with high accuracy</p>
+            <div class="feature-card" style="animation: fadeInUp 0.8s ease-out 1s both;">
+                <div class="feature-icon"><i class="fas fa-network-wired"></i></div>
+                <h3>Neural Prediction</h3>
+                <p>Proprietary deep learning models forecast epidemiological vectors up to 14 days in advance with 94% confidence.</p>
             </div>
-        </div>
+            <div class="feature-card" style="animation: fadeInUp 0.8s ease-out 1.2s both;">
+                <div class="feature-icon"><i class="fas fa-biohazard"></i></div>
+                <h3>Automated Response</h3>
+                <p>Autonomous generation of optimal mitigation protocols and localized civilian broadcasting parameters.</p>
+            </div>
+        </section>
+
+        <section id="tech" class="tech-section">
+            <h2>Powered By Enterprise Infrastructure</h2>
+            <div class="tech-badges">
+                <div class="tech-badge"><i class="fab fa-python" style="color: #3776AB;"></i> Python Flask Engine</div>
+                <div class="tech-badge"><i class="fas fa-database" style="color: #f59e0b;"></i> High-IOPS SQL Cluster</div>
+                <div class="tech-badge"><i class="fas fa-brain" style="color: #10b981;"></i> Tensor Analytics</div>
+                <div class="tech-badge"><i class="fab fa-aws" style="color: #FF9900;"></i> AWS EC2 / RDS / S3</div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2024 HealthWatch Diagnostics Group. Classified - Authorized Assets Only.</p>
+        </footer>
     </div>
-
-    <!-- About Section -->
-    <div class="container" style="margin-top: 4rem; margin-bottom: 4rem;">
-        <div style="background: white; border-radius: 15px; padding: 3rem; box-shadow: var(--shadow);">
-            <h2 style="color: var(--primary-blue); margin-bottom: 2rem; text-align: center;">
-                About HealthWatch
-            </h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                <div>
-                    <h3 style="color: #666; margin-bottom: 1rem;">
-                        <i class="fas fa-bullseye" style="color: var(--secondary-blue);"></i> Our Mission
-                    </h3>
-                    <p style="line-height: 1.8; color: #555;">
-                        HealthWatch provides public health officials and policymakers with real-time 
-                        disease surveillance data and AI-powered outbreak predictions to enable 
-                        faster, more informed responses to emerging health threats.
-                    </p>
-                </div>
-                <div>
-                    <h3 style="color: #666; margin-bottom: 1rem;">
-                        <i class="fas fa-cogs" style="color: var(--secondary-blue);"></i> How It Works
-                    </h3>
-                    <p style="line-height: 1.8; color: #555;">
-                        Data is collected from healthcare facilities, processed through our ML pipeline, 
-                        and visualized on an interactive dashboard. Administrators can upload new data, 
-                        while the system automatically updates predictions.
-                    </p>
-                </div>
-            </div>
-            <div style="margin-top: 2rem; text-align: center;">
-                <div style="display: inline-block; padding: 0.5rem 2rem; background: #f8f9fa; border-radius: 25px;">
-                    <i class="fas fa-cloud-upload-alt" style="color: var(--secondary-blue);"></i>
-                    Deployed on AWS EC2, RDS & S3
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer style="background: var(--primary-blue); color: white; padding: 2rem 0; margin-top: 4rem;">
-        <div class="container" style="text-align: center;">
-            <p style="opacity: 0.9;">&copy; 2024 HealthWatch. All rights reserved.</p>
-            <p style="opacity: 0.7; font-size: 0.9rem; margin-top: 1rem;">
-                Built with Flask, MySQL, and Machine Learning for disease surveillance
-            </p>
-        </div>
-    </footer>
-
-    <script>
-        // Add smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
 </body>
 </html>

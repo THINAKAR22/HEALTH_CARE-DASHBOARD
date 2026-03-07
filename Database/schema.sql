@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS disease_cases (
 );
 
 -- Sample data for testing
-INSERT INTO disease_cases (region, district, date, cases, recoveries, deaths, population) VALUES
+INSERT IGNORE INTO disease_cases (region, district, date, cases, recoveries, deaths, population) VALUES
 ('North', 'Delhi', '2024-01-01', 150, 120, 5, 20000000),
 ('North', 'Delhi', '2024-01-02', 165, 130, 6, 20000000),
 ('North', 'Delhi', '2024-01-03', 180, 140, 7, 20000000),
@@ -50,12 +50,5 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-cursor.execute("""
-SELECT * FROM admin_users WHERE username='admin'
-""")
-
-if not cursor.fetchone():
-    cursor.execute("""
-    INSERT INTO admin_users (username, password_hash)
-    VALUES ('admin', 'scrypt:32768:8:1$J9Y0q7Xm2LpR4tVw$5a3e1c8b9d2f4a6c7e8b9d0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d')
-    """)
+INSERT IGNORE INTO admin_users (username, password_hash)
+VALUES ('admin', 'scrypt:32768:8:1$J9Y0q7Xm2LpR4tVw$5a3e1c8b9d2f4a6c7e8b9d0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d');

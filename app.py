@@ -46,7 +46,7 @@ def index():
 @app.route('/dashboard')
 def dashboard():
     """Main dashboard"""
-    return render_template('dashboard.html')
+    return render_template('hello.html')
 
 @app.route('/admin')
 def admin():
@@ -124,7 +124,7 @@ def get_data():
 @app.route('/predict-risk', methods=['POST'])
 def predict_risk_endpoint():
     """API endpoint for risk prediction"""
-    data = request.json
+    data = request.json or {}
     region = data.get('region', 'Unknown')
     cases = int(data.get('cases', 0))
     prev_cases = data.get('prev_cases')
@@ -145,6 +145,7 @@ def upload_csv():
     if not file.filename.endswith('.csv'):
         return jsonify({'error': 'Please upload a CSV file'}), 400
     
+    connection = None
     try:
         # Read CSV
         df = pd.read_csv(file)

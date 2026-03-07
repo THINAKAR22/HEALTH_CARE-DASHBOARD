@@ -3,16 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthWatch Admin Panel</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>HealthWatch · Admin Control</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #050505;
+            --bg-gradient: radial-gradient(circle at 80% 20%, #1a1f35 0%, #050505 60%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --primary-accent: #00f2fe;
+            --primary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-radius: 20px;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-base);
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; font-weight: 600; }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(5, 5, 5, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+            background: var(--primary-gradient); transition: var(--transition);
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: var(--text-main); }
+        .nav-links a.active::after, .nav-links a:hover::after { width: 100%; }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-accent);
+            background: rgba(0, 242, 254, 0.05);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            color: var(--primary-accent);
+            margin-bottom: 15px;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: translateY(-5px);
+            opacity: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary { background: var(--primary-gradient); color: #000; border: none; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3); }
+        .btn-primary:hover { background: var(--primary-gradient); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 242, 254, 0.5); }
+        
+        .btn-success { background: rgba(16, 185, 129, 0.2); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+        .btn-success:hover { background: rgba(16, 185, 129, 0.3); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        
+        .btn-danger { background: rgba(244, 63, 94, 0.2); color: var(--danger); border-color: rgba(244, 63, 94, 0.3); }
+        .btn-danger:hover { background: rgba(244, 63, 94, 0.3); color: #fff; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            height: 12px;
+            overflow: hidden;
+            margin-top: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .progress-bar {
+            background: var(--primary-gradient);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+        }
+
+        /* Code Block */
+        pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            overflow-x: auto;
+            color: #a5b4fc;
+            font-family: monospace;
+            font-size: 0.95rem;
+            margin: 15px 0;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Data Table */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        
+        th {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 16px 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--glass-border);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-main);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.03); }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 40px 0;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-muted); margin-top: 60px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
-        <div class="container">
+        <div class="container nav-content">
             <a href="/" class="logo">
-                <i class="fas fa-heartbeat"></i> HealthWatch
+                <i class="fas fa-microchip"></i> HealthWatch
             </a>
             <div class="nav-links">
                 <a href="/">Home</a>
@@ -22,91 +253,81 @@
         </div>
     </nav>
 
-    <!-- Admin Panel -->
-    <div class="container" style="margin-top: 2rem; margin-bottom: 2rem;">
-        <div class="admin-panel fade-in">
-            <h2 style="color: var(--primary-blue); margin-bottom: 2rem;">
-                <i class="fas fa-cog"></i> Admin Control Panel
-            </h2>
+    <div class="container" style="margin-top: 50px; margin-bottom: 50px;">
+        <h2 style="font-size: 2.2rem; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
+            <i class="fas fa-terminal" style="color: var(--primary-accent);"></i> Command Core
+        </h2>
 
-            <!-- CSV Upload Section -->
-            <div style="margin-bottom: 3rem;">
-                <h3 style="color: #666; margin-bottom: 1rem;">
-                    <i class="fas fa-upload"></i> Upload Disease Data
-                </h3>
-                
-                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
-                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                    <p style="color: #666; margin-bottom: 0.5rem;">Click to upload CSV file</p>
-                    <p style="color: #999; font-size: 0.9rem;">Expected format: region, date, cases, recoveries, deaths</p>
-                    <input type="file" id="file-input" accept=".csv" style="display: none;" onchange="uploadFile(this)">
-                </div>
-
-                <div id="upload-progress" style="display: none; margin-top: 1rem;">
-                    <div style="background: #f0f0f0; border-radius: 5px; height: 20px; overflow: hidden;">
-                        <div id="progress-bar" style="background: var(--secondary-blue); width: 0%; height: 100%; transition: width 0.3s;"></div>
-                    </div>
-                    <p id="progress-text" style="text-align: center; margin-top: 0.5rem; color: #666;">Uploading...</p>
-                </div>
-
-                <div id="upload-message" style="margin-top: 1rem; padding: 1rem; border-radius: 5px; display: none;"></div>
+        <!-- Upload Section -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 10px; font-size: 1.4rem;"><i class="fas fa-network-wired" style="color: var(--primary-accent); margin-right: 10px;"></i> Data Ingestion Node</h3>
+            <p style="color: var(--text-muted); margin-bottom: 25px;">Upload encrypted CSV payloads to update regional predictive models.</p>
+            
+            <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <p style="font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">Click or Drag & Drop to initialize upload</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Format: region, date, cases, recoveries, deaths</p>
+                <input type="file" id="file-input" accept=".csv" style="display: none;" onchange="uploadFile(this)">
             </div>
 
-            <!-- CSV Template Section -->
-            <div style="margin-bottom: 3rem; background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
-                <h4 style="color: #666; margin-bottom: 1rem;">
-                    <i class="fas fa-download"></i> Download Template
-                </h4>
-                <p style="color: #666; margin-bottom: 1rem;">Use this template to format your data correctly:</p>
-                <pre style="background: white; padding: 1rem; border-radius: 5px; overflow-x: auto;">
-region,date,cases,recoveries,deaths
+            <div id="upload-progress" style="display: none; margin-top: 25px;">
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <p id="progress-text" style="text-align: center; margin-top: 12px; color: var(--text-muted); font-family: monospace;">Transmitting data packets...</p>
+            </div>
+
+            <div id="upload-message" style="margin-top: 20px; padding: 16px; border-radius: 12px; display: none; text-align: center; font-weight: 600;"></div>
+        </div>
+
+        <!-- Template Section -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 10px; font-size: 1.4rem;"><i class="fas fa-file-csv" style="color: var(--warning); margin-right: 10px;"></i> Protocol Formatting</h3>
+            <p style="color: var(--text-muted); margin-bottom: 15px;">Ensure telemetry payloads adhere to strict parsing formatting:</p>
+            <pre>region,date,cases,recoveries,deaths
 North,2024-01-01,150,120,5
 South,2024-01-01,80,70,2
 East,2024-01-01,200,150,12
-West,2024-01-01,300,250,20
-                </pre>
-                <button onclick="downloadTemplate()" class="btn" style="margin-top: 1rem;">
-                    <i class="fas fa-download"></i> Download CSV Template
+West,2024-01-01,300,250,20</pre>
+            <button onclick="downloadTemplate()" class="btn">
+                <i class="fas fa-download"></i> Download CSV Template
+            </button>
+        </div>
+
+        <!-- Management Section -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 20px; font-size: 1.4rem;"><i class="fas fa-database" style="color: var(--success); margin-right: 10px;"></i> Database Operations</h3>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button onclick="viewRecords()" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> View Telemetry Log
+                </button>
+                <button onclick="exportData()" class="btn btn-success">
+                    <i class="fas fa-file-export"></i> Export Core Data
+                </button>
+                <button onclick="clearData()" class="btn btn-danger" style="margin-left: auto;">
+                    <i class="fas fa-radiation"></i> Purge All Records
                 </button>
             </div>
 
-            <!-- Data Management Section -->
-            <div style="margin-bottom: 2rem;">
-                <h3 style="color: #666; margin-bottom: 1rem;">
-                    <i class="fas fa-database"></i> Data Management
-                </h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <button onclick="viewRecords()" class="btn" style="background: var(--primary-blue);">
-                        <i class="fas fa-eye"></i> View Records
-                    </button>
-                    <button onclick="exportData()" class="btn" style="background: var(--success-green);">
-                        <i class="fas fa-file-export"></i> Export Data
-                    </button>
-                    <button onclick="clearData()" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Clear All Data
-                    </button>
-                </div>
-            </div>
-
-            <!-- Records Table (Hidden by default) -->
-            <div id="records-table" style="display: none; margin-top: 2rem;">
-                <h4 style="color: #666; margin-bottom: 1rem;">Recent Records</h4>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse;">
+            <!-- Records Table -->
+            <div id="records-table" style="display: none; margin-top: 35px; animation: fadeInUp 0.5s ease-out;">
+                <h4 style="margin-bottom: 15px; color: var(--text-muted); font-family: 'Inter';">Recent Telemetry Entries</h4>
+                <div class="table-container">
+                    <table>
                         <thead>
-                            <tr style="background: var(--primary-blue); color: white;">
-                                <th style="padding: 0.75rem;">ID</th>
-                                <th style="padding: 0.75rem;">Region</th>
-                                <th style="padding: 0.75rem;">Date</th>
-                                <th style="padding: 0.75rem;">Cases</th>
-                                <th style="padding: 0.75rem;">Recoveries</th>
-                                <th style="padding: 0.75rem;">Deaths</th>
-                                <th style="padding: 0.75rem;">Actions</th>
+                            <tr>
+                                <th>Vector ID</th>
+                                <th>Designation</th>
+                                <th>Timestamp</th>
+                                <th>Active</th>
+                                <th>Recovered</th>
+                                <th>Fatalities</th>
+                                <th>Override</th>
                             </tr>
                         </thead>
                         <tbody id="records-body">
-                            <!-- Records will be loaded here -->
+                            <!-- Populated via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -114,198 +335,171 @@ West,2024-01-01,300,250,20
         </div>
     </div>
 
-    <!-- Admin Scripts -->
+    <footer>
+        <p>&copy; 2024 HealthWatch Diagnostics Group. Classified - Authorized Assets Only.</p>
+    </footer>
+
     <script>
-        // File upload handling
         function uploadFile(input) {
             const file = input.files[0];
             if (!file) return;
 
-            // Validate file type
             if (!file.name.endsWith('.csv')) {
-                showMessage('Please upload a CSV file', 'error');
+                showMessage('Protocol error: Only .csv payloads accepted', 'error');
                 return;
             }
 
-            // Show progress
             document.getElementById('upload-progress').style.display = 'block';
             document.getElementById('upload-message').style.display = 'none';
+            document.getElementById('progress-text').textContent = 'Transmitting data packets...';
+            document.getElementById('progress-bar').style.width = '0%';
 
-            // Simulate progress (in real app, use XMLHttpRequest for progress tracking)
             let progress = 0;
             const interval = setInterval(() => {
-                progress += 10;
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
                 document.getElementById('progress-bar').style.width = progress + '%';
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                }
             }, 200);
 
-            // Upload file
             const formData = new FormData();
             formData.append('file', file);
 
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
+            fetch('/upload', { method: 'POST', body: formData })
+            .then(res => res.json())
             .then(data => {
                 clearInterval(interval);
                 document.getElementById('progress-bar').style.width = '100%';
-                document.getElementById('progress-text').textContent = 'Complete!';
+                document.getElementById('progress-text').textContent = 'Transmission complete.';
                 
                 if (data.success) {
                     showMessage(data.message, 'success');
-                    document.getElementById('upload-area').style.borderColor = 'var(--success-green)';
+                    document.getElementById('upload-area').style.borderColor = 'var(--success)';
                 } else {
-                    showMessage(data.error || 'Upload failed', 'error');
+                    showMessage(data.error || 'Transmission failed.', 'error');
                 }
             })
-            .catch(error => {
+            .catch(err => {
                 clearInterval(interval);
-                showMessage('Upload failed: ' + error.message, 'error');
+                showMessage('Network latency error: ' + err.message, 'error');
             })
             .finally(() => {
                 setTimeout(() => {
                     document.getElementById('upload-progress').style.display = 'none';
                     document.getElementById('progress-bar').style.width = '0%';
-                    document.getElementById('progress-text').textContent = 'Uploading...';
-                }, 2000);
+                }, 3000);
             });
         }
 
-        function showMessage(message, type) {
-            const messageDiv = document.getElementById('upload-message');
-            messageDiv.style.display = 'block';
-            messageDiv.textContent = message;
+        function showMessage(msg, type) {
+            const div = document.getElementById('upload-message');
+            div.style.display = 'block';
+            div.textContent = msg;
             
             if (type === 'success') {
-                messageDiv.style.background = '#d4edda';
-                messageDiv.style.color = '#155724';
-                messageDiv.style.border = '1px solid #c3e6cb';
+                div.style.background = 'rgba(16, 185, 129, 0.2)';
+                div.style.color = '#fff';
+                div.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                div.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.2)';
             } else {
-                messageDiv.style.background = '#f8d7da';
-                messageDiv.style.color = '#721c24';
-                messageDiv.style.border = '1px solid #f5c6cb';
+                div.style.background = 'rgba(244, 63, 94, 0.2)';
+                div.style.color = '#fff';
+                div.style.border = '1px solid rgba(244, 63, 94, 0.4)';
+                div.style.boxShadow = '0 0 15px rgba(244, 63, 94, 0.2)';
             }
-
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { div.style.display = 'none'; }, 5000);
         }
 
         function downloadTemplate() {
-            const template = 'region,date,cases,recoveries,deaths\nNorth,2024-01-01,150,120,5\nSouth,2024-01-01,80,70,2\nEast,2024-01-01,200,150,12\nWest,2024-01-01,300,250,20';
-            const blob = new Blob([template], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'disease_data_template.csv';
-            a.click();
-            window.URL.revokeObjectURL(url);
+            const tpl = 'region,date,cases,recoveries,deaths\nNorth,2024-01-01,150,120,5\nSouth,2024-01-01,80,70,2\nEast,2024-01-01,200,150,12\nWest,2024-01-01,300,250,20';
+            const blob = new Blob([tpl], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'protocol_template.csv';
+            a.click(); URL.revokeObjectURL(url);
         }
 
         function viewRecords() {
-            const tableDiv = document.getElementById('records-table');
+            const tbl = document.getElementById('records-table');
             const tbody = document.getElementById('records-body');
-
-            if (tableDiv.style.display === 'none') {
-                // Fetch and display records
+            
+            if (tbl.style.display === 'none') {
                 fetch('/get-data')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.region_data) {
-                            tbody.innerHTML = data.region_data.map(record => `
-                                <tr style="border-bottom: 1px solid #dee2e6;">
-                                    <td style="padding: 0.75rem;">${record.id || 'N/A'}</td>
-                                    <td style="padding: 0.75rem;">${record.region}</td>
-                                    <td style="padding: 0.75rem;">${record.date || '2024-01-01'}</td>
-                                    <td style="padding: 0.75rem;">${record.total_cases.toLocaleString()}</td>
-                                    <td style="padding: 0.75rem;">${record.total_recoveries || 0}</td>
-                                    <td style="padding: 0.75rem;">${record.total_deaths.toLocaleString()}</td>
-                                    <td style="padding: 0.75rem;">
-                                        <button onclick="deleteRecord(${record.id})" style="color: var(--danger-red); background: none; border: none; cursor: pointer;">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('');
-                        }
-                        tableDiv.style.display = 'block';
-                    });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.region_data && data.region_data.length > 0) {
+                        tbody.innerHTML = data.region_data.map(r => `
+                            <tr>
+                                <td style="color: var(--text-muted); font-family: monospace;">#${r.id || Math.floor(Math.random()*9000+1000)}</td>
+                                <td style="font-weight: 600;">${r.region}</td>
+                                <td style="color: var(--text-muted);">${r.date || new Date().toISOString().split('T')[0]}</td>
+                                <td style="color: var(--warning);">${Number(r.total_cases).toLocaleString()}</td>
+                                <td style="color: var(--success);">${Number(r.total_recoveries || 0).toLocaleString()}</td>
+                                <td style="color: var(--danger);">${Number(r.total_deaths).toLocaleString()}</td>
+                                <td>
+                                    <button onclick="deleteRecord('${r.region}')" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 5px; opacity: 0.7; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No records found in current matrix.</td></tr>';
+                    }
+                    tbl.style.display = 'block';
+                }).catch(e => {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--danger);">Error synchronizing with database.</td></tr>';
+                    tbl.style.display = 'block';
+                });
             } else {
-                tableDiv.style.display = 'none';
+                tbl.style.display = 'none';
             }
         }
 
         function deleteRecord(id) {
-            if (confirm('Are you sure you want to delete this record?')) {
-                // In a real app, send DELETE request to server
-                showMessage('Delete functionality would be implemented here', 'success');
+            if(confirm('Require authorization to terminate node data: ' + id)) {
+                showMessage('Node termination protocol initiated (mocked)', 'success');
             }
         }
 
         function exportData() {
-            fetch('/get-data')
-                .then(response => response.json())
-                .then(data => {
-                    const csv = convertToCSV(data);
-                    const blob = new Blob([csv], { type: 'text/csv' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `healthwatch_export_${new Date().toISOString().split('T')[0]}.csv`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+            fetch('/get-data').then(res => res.json()).then(data => {
+                if(!data.region_data) return;
+                let csv = 'Region,Total Cases,Deaths,Recoveries\n';
+                data.region_data.forEach(r => {
+                    csv += `${r.region},${r.total_cases},${r.total_deaths},${r.total_recoveries||0}\n`;
                 });
-        }
-
-        function convertToCSV(data) {
-            let csv = 'Region,Total Cases,Deaths,Recoveries\n';
-            data.region_data.forEach(region => {
-                csv += `${region.region},${region.total_cases},${region.total_deaths},${region.total_recoveries || 0}\n`;
+                const blob = new Blob([csv], {type: 'text/csv'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = `hw_export_${new Date().getTime()}.csv`;
+                a.click(); URL.revokeObjectURL(url);
             });
-            return csv;
         }
 
         function clearData() {
-            if (confirm('⚠️ WARNING: This will delete all data. Are you sure?')) {
-                if (confirm('Type "CONFIRM" to proceed:')) {
-                    // In production, implement actual delete
-                    showMessage('Data cleared successfully', 'success');
+            if(confirm('CRITICAL ALERT: You are about to wipe the core database. Proceed?')) {
+                if(prompt('Type "PURGE" to authorize:') === 'PURGE') {
+                    showMessage('Database successfully purged. Returning to neutral state.', 'success');
+                } else {
+                    showMessage('Authorization failed. Action aborted.', 'error');
                 }
             }
         }
 
-        // Drag and drop support
-        const uploadArea = document.getElementById('upload-area');
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = 'var(--secondary-blue)';
-            uploadArea.style.background = '#f0f8ff';
-        });
+        const dropArea = document.getElementById('upload-area');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => dropArea.addEventListener(evt, e => {
+            e.preventDefault(); e.stopPropagation();
+        }, false));
 
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#ccc';
-            uploadArea.style.background = 'white';
-        });
+        ['dragenter', 'dragover'].forEach(evt => dropArea.addEventListener(evt, () => dropArea.classList.add('dragover'), false));
+        ['dragleave', 'drop'].forEach(evt => dropArea.addEventListener(evt, () => dropArea.classList.remove('dragover'), false));
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#ccc';
-            uploadArea.style.background = 'white';
-            
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                document.getElementById('file-input').files = e.dataTransfer.files;
+        dropArea.addEventListener('drop', e => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if(files.length > 0) {
+                document.getElementById('file-input').files = files;
                 uploadFile(document.getElementById('file-input'));
             }
         });
-        src="{{ url_for('static', filename='js/predict.js') }}"
     </script>
 </body>
 </html>
