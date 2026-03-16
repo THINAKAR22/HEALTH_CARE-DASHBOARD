@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HealthWatch — India Disease Monitoring</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="mode-citizen">
+
+<!-- ===================== SIDEBAR ===================== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon"><i class="fa-solid fa-heart-pulse"></i></span>
+    <span class="brand-name">HealthWatch</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-view="citizen" onclick="switchView('citizen',this)">
+      <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-view="upload" onclick="switchView('upload',this)">
+      <i class="fa-solid fa-cloud-arrow-up"></i><span>Upload Data</span>
+    </a>
+    <a href="#" class="nav-item" data-view="risk" onclick="switchView('risk',this)">
+      <i class="fa-solid fa-triangle-exclamation"></i><span>Risk Analysis</span>
+    </a>
+    <a href="#" class="nav-item" data-view="alerts" onclick="switchView('alerts',this)">
+      <i class="fa-solid fa-bell"></i><span>Alerts</span>
+      <span class="badge">3</span>
+    </a>
+    <a href="#" class="nav-item" data-view="reports" onclick="switchView('reports',this)">
+      <i class="fa-solid fa-file-chart-column"></i><span>Reports</span>
+    </a>
+  </nav>
+  <div class="sidebar-divider"></div>
+  <div class="mode-switcher">
+    <p class="mode-label">View Mode</p>
+    <button class="mode-btn active" id="btn-citizen" onclick="setMode('citizen')">
+      <i class="fa-solid fa-user"></i> Citizen
+    </button>
+    <button class="mode-btn" id="btn-admin" onclick="setMode('admin')">
+      <i class="fa-solid fa-shield-halved"></i> Admin
+    </button>
+  </div>
+  <div class="sidebar-footer">
+    <span>v2.4.1 · Live</span>
+    <span class="live-dot"></span>
+  </div>
+</aside>
+
+<!-- ===================== MAIN WRAP ===================== -->
+<div class="main-wrap">
+
+  <!-- ===== CITIZEN TOP NAV ===== -->
+  <header class="topnav citizen-header" id="citizen-topnav">
+    <button class="hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <nav class="topnav-links">
+      <a href="#" class="tnav active">Home</a>
+      <a href="#" class="tnav" onclick="scrollTo('district-section')">Check My District</a>
+      <a href="#" class="tnav" onclick="scrollTo('report-section')">Report Disease</a>
+      <a href="#" class="tnav" onclick="scrollTo('alert-section')">Alerts</a>
+    </nav>
+    <div class="topnav-right">
+      <span class="topnav-date" id="live-date"></span>
+      <div class="avatar">AR</div>
+    </div>
+  </header>
+
+  <!-- ===== ADMIN TOP NAV ===== -->
+  <header class="topnav admin-header hidden" id="admin-topnav">
+    <button class="hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="admin-title"><i class="fa-solid fa-shield-halved"></i> Admin Control Center</div>
+    <div class="topnav-right">
+      <span class="topnav-date" id="live-date-admin"></span>
+      <div class="avatar admin-avatar">AD</div>
+    </div>
+  </header>
+
+  <!-- =================== CITIZEN VIEW =================== -->
+  <main class="content citizen-view" id="citizen-view">
+
+    <!-- Risk Banner -->
+    <div class="risk-banner moderate" id="risk-banner">
+      <div class="risk-left">
+        <span class="risk-pill">⚠ Moderate Risk</span>
+        <p class="risk-msg">Local cases are increasing. Monitor symptoms and take precautions.</p>
+      </div>
+      <div class="risk-actions">
+        <button class="risk-cta" onclick="scrollTo('report-section')">Report Symptoms</button>
+        <button class="risk-dismiss" onclick="dismissBanner()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <section class="cards-grid">
+      <div class="stat-card" style="--accent:#ef4444">
+        <div class="card-icon"><i class="fa-solid fa-virus"></i></div>
+        <div class="card-body">
+          <span class="card-label">Active Cases</span>
+          <span class="card-value" data-count="12847">0</span>
+          <span class="card-trend up"><i class="fa-solid fa-arrow-trend-up"></i> +4.2% this week</span>
+        </div>
+        <div class="card-sparkline" id="spark1"></div>
+      </div>
+      <div class="stat-card" style="--accent:#f97316">
+        <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="card-body">
+          <span class="card-label">Weekly Growth</span>
+          <span class="card-value" data-count="4" data-suffix="%">0%</span>
+          <span class="card-trend up"><i class="fa-solid fa-arrow-trend-up"></i> +1.1% vs last week</span>
+        </div>
+        <div class="card-sparkline" id="spark2"></div>
+      </div>
+      <div class="stat-card" style="--accent:#22c55e">
+        <div class="card-icon"><i class="fa-solid fa-bed-pulse"></i></div>
+        <div class="card-body">
+          <span class="card-label">Hospital Beds Available</span>
+          <span class="card-value" data-count="3204">0</span>
+          <span class="card-trend down"><i class="fa-solid fa-arrow-trend-down"></i> -12% this week</span>
+        </div>
+        <div class="card-sparkline" id="spark3"></div>
+      </div>
+      <div class="stat-card" style="--accent:#3b82f6">
+        <div class="card-icon"><i class="fa-solid fa-heart-circle-check"></i></div>
+        <div class="card-body">
+          <span class="card-label">Recovery Rate</span>
+          <span class="card-value" data-count="87" data-suffix="%">0%</span>
+          <span class="card-trend up"><i class="fa-solid fa-arrow-trend-up"></i> +2.3% this week</span>
+        </div>
+        <div class="card-sparkline" id="spark4"></div>
+      </div>
+    </section>
+
+    <!-- Trend Chart -->
+    <section class="section-block">
+      <div class="section-header">
+        <h2>Last 30 Days Trend</h2>
+        <div class="chart-toggles">
+          <button class="tog active" onclick="toggleChart('cases',this)">Cases</button>
+          <button class="tog" onclick="toggleChart('recoveries',this)">Recoveries</button>
+          <button class="tog" onclick="toggleChart('deaths',this)">Deaths</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Two column: alert + district -->
+    <div class="two-col" id="district-section">
+      <!-- Alert Box -->
+      <section class="alert-box" id="alert-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-bell"></i> Active Alerts</h2>
+          <span class="badge red">3</span>
+        </div>
+        <div class="alert-list">
+          <div class="alert-item high">
+            <span class="alert-dot"></span>
+            <div>
+              <strong>High Risk — Chennai North</strong>
+              <p>345 new cases in 48 hours. Monitor and prepare.</p>
+              <time>2 hours ago</time>
+            </div>
+          </div>
+          <div class="alert-item moderate">
+            <span class="alert-dot"></span>
+            <div>
+              <strong>Moderate — Mumbai Suburban</strong>
+              <p>ICU occupancy crossed 70% threshold.</p>
+              <time>5 hours ago</time>
+            </div>
+          </div>
+          <div class="alert-item low">
+            <span class="alert-dot"></span>
+            <div>
+              <strong>Advisory — Bengaluru East</strong>
+              <p>Cluster of respiratory cases detected.</p>
+              <time>Yesterday</time>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- District Lookup -->
+      <section class="district-lookup">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-map-pin"></i> Check My District</h2>
+        </div>
+        <select class="district-select" id="districtSelect" onchange="updateDistrictInfo()">
+          <option value="">— Select your district —</option>
+          <option value="chennai_north">Chennai North</option>
+          <option value="chennai_south">Chennai South</option>
+          <option value="mumbai_suburban">Mumbai Suburban</option>
+          <option value="bengaluru_east">Bengaluru East</option>
+          <option value="delhi_central">Delhi Central</option>
+          <option value="hyderabad_urban">Hyderabad Urban</option>
+          <option value="kolkata_north">Kolkata North</option>
+          <option value="pune_city">Pune City</option>
+        </select>
+        <div class="district-result hidden" id="districtResult">
+          <div class="dr-risk" id="drRisk"></div>
+          <div class="dr-stats">
+            <div><span id="drCases">—</span><label>Cases</label></div>
+            <div><span id="drICU">—</span><label>ICU %</label></div>
+            <div><span id="drBeds">—</span><label>Beds Free</label></div>
+          </div>
+          <p class="dr-advice" id="drAdvice"></p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Report Form -->
+    <section class="section-block report-section" id="report-section">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-file-medical"></i> Report Disease Symptoms</h2>
+        <span class="subtext">Anonymous · Confidential</span>
+      </div>
+      <form class="report-form" onsubmit="submitReport(event)">
+        <div class="form-row">
+          <div class="symptom-toggle">
+            <label>Fever</label>
+            <div class="toggle-wrap">
+              <button type="button" class="sym-btn active" data-val="yes" onclick="toggleSym(this,'fever','yes')">Yes</button>
+              <button type="button" class="sym-btn" data-val="no" onclick="toggleSym(this,'fever','no')">No</button>
+            </div>
+          </div>
+          <div class="symptom-toggle">
+            <label>Cough</label>
+            <div class="toggle-wrap">
+              <button type="button" class="sym-btn active" data-val="yes" onclick="toggleSym(this,'cough','yes')">Yes</button>
+              <button type="button" class="sym-btn" data-val="no" onclick="toggleSym(this,'cough','no')">No</button>
+            </div>
+          </div>
+          <div class="symptom-toggle">
+            <label>Breathlessness</label>
+            <div class="toggle-wrap">
+              <button type="button" class="sym-btn" data-val="yes" onclick="toggleSym(this,'breath','yes')">Yes</button>
+              <button type="button" class="sym-btn active" data-val="no" onclick="toggleSym(this,'breath','no')">No</button>
+            </div>
+          </div>
+          <div class="symptom-toggle">
+            <label>Fatigue</label>
+            <div class="toggle-wrap">
+              <button type="button" class="sym-btn" data-val="yes" onclick="toggleSym(this,'fatigue','yes')">Yes</button>
+              <button type="button" class="sym-btn active" data-val="no" onclick="toggleSym(this,'fatigue','no')">No</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Other Symptoms</label>
+            <textarea placeholder="Describe any other symptoms you are experiencing..." rows="3"></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your District</label>
+            <select>
+              <option>— Select district —</option>
+              <option>Chennai North</option>
+              <option>Mumbai Suburban</option>
+              <option>Bengaluru East</option>
+              <option>Delhi Central</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Duration (days)</label>
+            <input type="number" min="1" max="30" placeholder="e.g. 3"/>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fa-solid fa-paper-plane"></i> Submit Report
+        </button>
+      </form>
+      <div class="form-success hidden" id="formSuccess">
+        <i class="fa-solid fa-circle-check"></i>
+        <p>Thank you. Your report has been submitted and will help us monitor disease spread in your area.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =================== ADMIN VIEW =================== -->
+  <main class="content admin-view hidden" id="admin-view">
+
+    <!-- Admin Summary Cards -->
+    <section class="cards-grid">
+      <div class="stat-card" style="--accent:#6366f1">
+        <div class="card-icon"><i class="fa-solid fa-map"></i></div>
+        <div class="card-body">
+          <span class="card-label">Total Districts</span>
+          <span class="card-value" data-count="742">0</span>
+          <span class="card-trend neutral">Monitored in real-time</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#ef4444">
+        <div class="card-icon"><i class="fa-solid fa-circle-radiation"></i></div>
+        <div class="card-body">
+          <span class="card-label">High Risk Areas</span>
+          <span class="card-value" data-count="47">0</span>
+          <span class="card-trend up"><i class="fa-solid fa-arrow-trend-up"></i> +6 since last week</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#f97316">
+        <div class="card-icon"><i class="fa-solid fa-virus"></i></div>
+        <div class="card-body">
+          <span class="card-label">Total Active Cases</span>
+          <span class="card-value" data-count="89420">0</span>
+          <span class="card-trend up"><i class="fa-solid fa-arrow-trend-up"></i> +2,341 today</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#ec4899">
+        <div class="card-icon"><i class="fa-solid fa-hospital"></i></div>
+        <div class="card-body">
+          <span class="card-label">ICU Usage</span>
+          <span class="card-value" data-count="68" data-suffix="%">0%</span>
+          <span class="card-trend up"><i class="fa-solid fa-arrow-trend-up"></i> Critical threshold: 80%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Map + Chart row -->
+    <div class="two-col admin-map-row">
+      <section class="section-block map-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-map-location-dot"></i> District Risk Map — India</h2>
+          <div class="map-legend">
+            <span class="leg green">Low</span>
+            <span class="leg yellow">Medium</span>
+            <span class="leg red">High</span>
+          </div>
+        </div>
+        <div id="indiaMap"></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-header">
+          <h2>Case Growth by State</h2>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="adminBarChart"></canvas>
+        </div>
+        <div class="chart-wrap" style="margin-top:16px">
+          <canvas id="adminDoughnut"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <!-- District Table -->
+    <section class="section-block">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-table"></i> District Data Overview</h2>
+        <input type="text" class="table-search" placeholder="Search city..." onkeyup="filterTable(this)"/>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="districtTable">
+          <thead>
+            <tr>
+              <th>City / District</th>
+              <th>State</th>
+              <th>Active Cases</th>
+              <th>ICU Occupied</th>
+              <th>ICU Usage %</th>
+              <th>Risk Level</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- Toast -->
+<div class="toast hidden" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
